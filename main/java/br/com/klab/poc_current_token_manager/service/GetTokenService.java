@@ -34,7 +34,7 @@ public class GetTokenService {
             tokenResponse.setStatusEntity(token.currentStatus());
 
             responseMap.put(
-                    tokenType.name() + " (Hashs: " + System.identityHashCode(token) + ")",
+                    tokenType.name() + " (Hash: " + System.identityHashCode(token) + ")",
                     tokenResponse
             );
         });

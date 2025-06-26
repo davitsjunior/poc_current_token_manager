@@ -9,14 +9,8 @@ public class TokenResponse extends TokenModel {
         private String accessToken;
         @JsonProperty("expires_in")
         private Long expiresIn;
-//        @JsonProperty("refresh_expires_in")
-//        private Integer refreshExpiresIn;
         @JsonProperty("token_type")
         private String tokenType;
-//        @JsonProperty("not-before-policy")
-//        private Integer notBeforePolicy;
-//        @JsonProperty("scope")
-//        private String scope;
 
          private StatusEntity statusEntity;
 

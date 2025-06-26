@@ -8,11 +8,15 @@ import br.com.klab.poc_current_token_manager.tokenmanagement.repository.TokenRep
 import br.com.klab.poc_current_token_manager.tokenmanagement.service.GenerateTokenService;
 import co.elastic.apm.api.CaptureSpan;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class CurrentToken {
 
     private final GenerateTokenService tokenService;
 
     private final TokenManagement tokenManagement;
+
+    private final AtomicBoolean syncInProgress = new AtomicBoolean(false);
 
     private CurrentToken(GenerateTokenService tokenService, String tokenName) {
         this.tokenService = tokenService;
@@ -41,7 +45,7 @@ public class CurrentToken {
     public TokenModel getCurrentToken() throws GenerateTokenException {
         StatusEntity status = this.tokenManagement.currentStatus();
         if (status.withoutToken() || status.red()) {
-            this.syncCall();
+            this.trySyncCall();
         }
         if (status.isNotRunning() && status.isNotGreen()) {
             this.asyncCall();
@@ -49,9 +53,22 @@ public class CurrentToken {
         return this.tokenManagement.tokenModel();
     }
 
+//    @CaptureSpan
+//    private void syncCall() throws GenerateTokenException {
+//        this.generateToken();
+//    }
+
     @CaptureSpan
-    private void syncCall() throws GenerateTokenException {
-        this.generateToken();
+    private void trySyncCall() {
+        if (syncInProgress.compareAndSet(false, true)) {
+            try {
+                this.generateToken();
+            } catch (GenerateTokenException e) {
+                //TODO Validar
+            } finally {
+                syncInProgress.set(false);
+            }
+        }
     }
 
     @CaptureSpan
